@@ -19,4 +19,6 @@ public class CustomerParam {
     private String phone;
 
     private String address;
+
+    private String accountType;
 }

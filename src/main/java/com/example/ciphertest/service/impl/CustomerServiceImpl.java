@@ -4,9 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import com.example.ciphertest.aop.HelloPoint;
 import com.example.ciphertest.entity.Customer;
+import com.example.ciphertest.enums.AccountTypeEnum;
 import com.example.ciphertest.param.CustomerParam;
 import com.example.ciphertest.repository.CustomerRepository;
 import com.example.ciphertest.result.CustomerResult;
+import com.example.ciphertest.router.AccountTypeOperatorRouter;
+import com.example.ciphertest.service.AccountTypeOperator;
 import com.example.ciphertest.service.CustomerService;
 import com.example.commoncipher.annotation.EnDecryptMapperMethod;
 import org.springframework.data.domain.Example;
@@ -22,10 +25,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Resource
     private CustomerRepository customerRepository;
 
+    @Resource
+    private AccountTypeOperatorRouter accountTypeRouter;
+
     @Override
     @HelloPoint
     @EnDecryptMapperMethod
     public Integer insert(CustomerParam customer) {
+        AccountTypeEnum typeEnum = AccountTypeEnum.parseOfNullable(customer.getAccountType());
+        AccountTypeOperator operator = accountTypeRouter.route(typeEnum);
+        operator.checkAccountExists(customer);
+
         Customer entity = BeanUtil.copyProperties(customer, Customer.class);
         customerRepository.save(entity);
         return 1;
